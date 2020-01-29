@@ -1,0 +1,126 @@
+<!doctype html><html><head><meta charset=utf8>
+  <!--
+    library Vue JS
+    - development version
+    - production version
+    <script src="https://cdn.jsdelivr.net/npm/vue"></script>
+  -->
+  <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+
+  <style>
+    body {
+      margin-right:100px;
+      margin-left:100px;
+    }
+  </style>
+
+  <script>
+    let payloads=[];
+
+    //parseja payloads
+    fetch('dades.js').then(response=>
+      response.json()
+    ).then(jsonResponse=>{
+      jsonResponse.list.forEach(du=>{
+        let payload = parse_payload(du.payload);
+        let recvTime = new Date(du.recvTime);
+        payload.recvTime = recvTime;
+        payloads.push(payload)
+      });
+    });
+
+
+    function parse_payload(payload){
+      let json_string="";
+      for(let i=0;i<payload.length;i+=2){
+        let substring = payload.substring(i,2+i);
+        json_string += String.fromCharCode(parseInt("0x"+substring));
+      }
+      json_string = json_string.replace('wid:','"wid":');
+      json_string = json_string.replace(',T:',',"T":');
+      json_string = json_string.replace(',cso:',',"cso":');
+      json_string = json_string.replace(',bat:',',"bat":');
+      json_string = json_string.replace(',tx:',',"tx":');
+      json_string = json_string.replace(',d:',',"d":');
+      let json_obj = JSON.parse(json_string);
+      return json_obj;
+    }
+  </script>
+</head><body>
+
+<!--logos-->
+<div id=logos>
+  <div>
+    <img src="img/gestor.jpg" style="width:40%">
+  </div>
+  <div>
+    <img src="img/dwc.jpg"    style="width:60%">
+  </div>
+  <style>
+    #logos{
+      display:flex;
+      justify-content:space-between;
+    }
+  </style>
+</div>
+
+<!--titol-->
+<h1 style="text-align:center">Sensors temperatura</h1>
+
+<!--grafic-->
+<div id="chart"></div>
+
+<!--dades crues-->
+<div id=app>
+  <ul>
+    <li v-for="payload in payloads">
+      {{payload}}
+    </li>
+  </ul>
+</div>
+
+<script>
+  let app = new Vue({
+    el:"#app",
+    data:{
+      payloads
+    }
+  });
+</script>
+
+<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+<script type='text/javascript'>
+  google.charts.load('current', {'packages':['annotationchart']});
+  google.charts.setOnLoadCallback(drawChart);
+
+  function drawChart(){
+    let DATA=[
+      ['Temps', "T1", "T2", "T3"],
+    ];
+
+    payloads.forEach(payload=>{
+      DATA.push([
+        payload.recvTime,
+        payload.T[0],
+        payload.T[1],
+        payload.T[2],
+      ]);
+    });
+
+    let data=google.visualization.arrayToDataTable(DATA);
+    let options={
+      colors:['blue','green','red'],
+      hAxis:{title:'Temps',},
+      height:"500",
+      legend:"bottom",
+      max:25,
+      min:10,
+      title:'Temperatura vs temps',
+      vAxis:{title:'ºC',},
+      width:"75%",
+    };
+    let el=document.querySelector("#chart");
+    let chart = new google.visualization.AnnotationChart(el);
+    chart.draw(data,options);
+  }
+</script>
