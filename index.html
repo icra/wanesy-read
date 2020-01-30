@@ -17,8 +17,18 @@
   <script>
     let payloads=[];
 
-    //parseja payloads
-    fetch('dades.js').then(response=>
+    //evita cache (https://stackoverflow.com/questions/29246444/fetch-how-do-you-make-a-non-cached-request)
+    let myHeaders=new Headers();
+    myHeaders.append('pragma', 'no-cache');
+    myHeaders.append('cache-control', 'no-cache');
+    let myInit={
+      method:'GET',
+      headers:myHeaders,
+    }
+    let myRequest=new Request('dades.js');
+
+    //fetch dades.js
+    fetch(myRequest,myInit).then(response=>
       response.json()
     ).then(jsonResponse=>{
       jsonResponse.list.forEach(du=>{
@@ -29,7 +39,7 @@
       });
     });
 
-
+    //parseja payloads
     function parse_payload(payload){
       let json_string="";
       for(let i=0;i<payload.length;i+=2){
@@ -65,29 +75,10 @@
 <!--titol-->
 <h1 style="text-align:center">Sensors temperatura</h1>
 
-<!--grafic-->
+<!--grafic 3 temperatures-->
 <div id="chart"></div>
-
-<!--dades crues-->
-<div id=app>
-  <ul>
-    <li v-for="payload in payloads">
-      {{payload}}
-    </li>
-  </ul>
-</div>
-
+<script src="https://www.gstatic.com/charts/loader.js"></script>
 <script>
-  let app = new Vue({
-    el:"#app",
-    data:{
-      payloads
-    }
-  });
-</script>
-
-<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
-<script type='text/javascript'>
   google.charts.load('current', {'packages':['annotationchart']});
   google.charts.setOnLoadCallback(drawChart);
 
@@ -122,3 +113,21 @@
     chart.draw(data,options);
   }
 </script>
+
+<!--dades crues-->
+<div id=app>
+  <ul>
+    <li v-for="payload in payloads">
+      {{payload}}
+    </li>
+  </ul>
+</div>
+<script>
+  let app = new Vue({
+    el:"#app",
+    data:{
+      payloads
+    }
+  });
+</script>
+
