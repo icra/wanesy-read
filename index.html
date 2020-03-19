@@ -15,7 +15,10 @@
   </style>
 
   <script>
-    let payloads=[];
+    //FILTRA
+    let wid="272b";
+
+    let payloads=[]; //tots els payloads
 
     //evita cache (https://stackoverflow.com/questions/29246444/fetch-how-do-you-make-a-non-cached-request)
     let myHeaders=new Headers();
@@ -25,9 +28,9 @@
       method:'GET',
       headers:myHeaders,
     }
-    let myRequest=new Request('dades.js');
+    let myRequest=new Request('data.js');
 
-    //fetch dades.js
+    //fetch data.js
     fetch(myRequest,myInit).then(response=>
       response.json()
     ).then(jsonResponse=>{
@@ -35,7 +38,10 @@
         let payload = parse_payload(du.payload);
         let recvTime = new Date(du.recvTime);
         payload.recvTime = recvTime;
-        payloads.push(payload)
+        //console.log(payload);
+        if(payload.wid){
+          payloads.push(payload);
+        }
       });
     });
 
@@ -58,7 +64,7 @@
   </script>
 </head><body>
 
-<!--logos-->
+<!--logos top-->
 <div id=logos>
   <div><img src="img/gestor.jpg" style="width:40%"></div>
   <div><img src="img/icra.png"   style="width:20%"></div>
@@ -72,11 +78,37 @@
   </style>
 </div>
 
-<!--titol-->
-<h1 style="text-align:center">Sensors temperatura</h1>
+<!--titol--><h1 style="text-align:center">Sensors temperatura</h1>
 
-<!--grafic 3 temperatures-->
-<div id="chart"></div>
+
+
+<!--dades crues-->
+<div id=app>
+
+  <!--botons per canviar de sensor-->
+  <div style="text-align:center">
+    Veure sensor:
+    <button
+      v-for="wid in wids"
+      @click="wid_filtra=wid;drawChart()"
+      :style="wid_filtra==wid ? 'font-weight:bold' :''"
+    >{{wid}}
+    </button>
+  </div><hr>
+
+  <!--grafic--><div id="chart"></div>
+
+  <!--dades crues-->
+  <ul>
+    <li v-for="payload,i in payloads.filter(p=>p.wid==wid_filtra)">
+      [{{i}}]
+      &mdash;
+      {{payload}}
+    </li>
+  </ul>
+</div>
+
+<!--chart-->
 <script src="https://www.gstatic.com/charts/loader.js"></script>
 <script>
   google.charts.load('current', {'packages':['annotationchart']});
@@ -88,12 +120,14 @@
     ];
 
     payloads.forEach(payload=>{
-      DATA.push([
-        payload.recvTime,
-        payload.T[0],
-        payload.T[1],
-        payload.T[2],
-      ]);
+      if(payload.wid==app.wid_filtra){
+        DATA.push([
+          payload.recvTime,
+          payload.T[0],
+          payload.T[1],
+          payload.T[2],
+        ]);
+      }
     });
 
     let data=google.visualization.arrayToDataTable(DATA);
@@ -114,20 +148,17 @@
   }
 </script>
 
-<!--dades crues-->
-<div id=app>
-  <ul>
-    <li v-for="payload in payloads">
-      {{payload}}
-    </li>
-  </ul>
-</div>
+<!--vue-->
 <script>
   let app = new Vue({
     el:"#app",
     data:{
-      payloads
-    }
+      payloads,
+      wids:["272b","6d31"],
+      wid_filtra:"272b", //valor inicial
+    },
+    methods:{
+      drawChart,
+    },
   });
 </script>
-

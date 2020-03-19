@@ -4,6 +4,6 @@
 password=$1
 
 while :;
-  do bash 2-crea-dades-js.sh $password;
+  do bash get-data.sh $password | tee data.js;
   sleep 600;
 done
