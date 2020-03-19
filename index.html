@@ -7,10 +7,15 @@
   -->
   <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
 
+  <!--CSS-->
   <style>
     body {
       margin-right:100px;
       margin-left:100px;
+    }
+    button.btn_veure_sensor {
+      padding:1em 1.62em;
+      margin-right:0.62em
     }
   </style>
 
@@ -36,8 +41,7 @@
     ).then(jsonResponse=>{
       jsonResponse.list.forEach(du=>{
         let payload = parse_payload(du.payload);
-        let recvTime = new Date(du.recvTime);
-        payload.recvTime = recvTime;
+        payload.recvTime = new Date(du.recvTime);
         //console.log(payload);
         if(payload.wid){
           payloads.push(payload);
@@ -80,32 +84,54 @@
 
 <!--titol--><h1 style="text-align:center">Sensors temperatura</h1>
 
-
-
 <!--dades crues-->
 <div id=app>
-
-  <!--botons per canviar de sensor-->
-  <div style="text-align:center">
+  <!--canviar sensor-->
+  <div style="text-align:center;font-size:large">
     Veure sensor:
     <button
       v-for="wid in wids"
       @click="wid_filtra=wid;drawChart()"
       :style="wid_filtra==wid ? 'font-weight:bold' :''"
+      class=btn_veure_sensor
     >{{wid}}
     </button>
-  </div><hr>
+  </div>
 
-  <!--grafic--><div id="chart"></div>
+  <!--grafic div-->
+  <div id="chart"></div>
 
   <!--dades crues-->
-  <ul>
-    <li v-for="payload,i in payloads.filter(p=>p.wid==wid_filtra)">
-      [{{i}}]
-      &mdash;
-      {{payload}}
-    </li>
-  </ul>
+  <table border=1 style="border-collapse:collapse;margin-top:10px">
+    <thead>
+      <tr>
+        <th>nº
+        <th>wid
+        <th>T1 (ºC)
+        <th>T2 (ºC)
+        <th>T3 (ºC)
+        <th>cso
+        <th>d (cm)
+        <th>batt (%)
+        <th>tx
+        <th>recvTime
+      </tr>
+    </thead>
+    <tbody>
+      <tr v-for="payload,i in payloads.filter(p=>p.wid==wid_filtra)">
+        <td>{{i}}
+        <td>{{payload.wid}}
+        <td>{{payload.T[0]}}
+        <td>{{payload.T[1]}}
+        <td>{{payload.T[2]}}
+        <td>{{payload.cso}}
+        <td>{{payload.d}}
+        <td>{{payload.bat}}
+        <td>{{payload.tx}}
+        <td>{{payload.recvTime.toString()}}
+      </tr>
+    </tbody>
+  </table>
 </div>
 
 <!--chart-->
