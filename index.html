@@ -42,6 +42,7 @@
       jsonResponse.list.forEach(du=>{
         let payload = parse_payload(du.payload);
         payload.recvTime = new Date(du.recvTime);
+        payload.gwInfo = du.gwInfo[0];
         //console.log(payload);
         if(payload.wid){
           payloads.push(payload);
@@ -98,6 +99,11 @@
     </button>
   </div>
 
+  <!--packet losss-->
+  <div style="border:1px solid #ccc;margin:1em 0;font-size:large;text-align:center">
+    <b>Paquets perduts</b>: {{packet_loss(wid_filtra)}} %
+  </div>
+
   <!--grafic div-->
   <div id="chart"></div>
 
@@ -115,6 +121,8 @@
         <th>batt (%)
         <th>tx
         <th>recvTime
+        <th>RSSI
+        <th>SNR
       </tr>
     </thead>
     <tbody>
@@ -129,6 +137,8 @@
         <td>{{payload.bat}}
         <td>{{payload.tx}}
         <td>{{payload.recvTime.toString()}}
+        <td>{{payload.gwInfo.rssi}}
+        <td>{{payload.gwInfo.snr}}
       </tr>
     </tbody>
   </table>
@@ -185,6 +195,16 @@
     },
     methods:{
       drawChart,
+      packet_loss(wid){
+        let payloads = Array.from(new Set(this.payloads.filter(p=>p.wid==wid).map(p=>p.tx)));
+        let tx_minim = Math.min.apply(null, payloads);
+        let tx_maxim = Math.max.apply(null, payloads);
+        let intents = tx_maxim - tx_minim;
+        let rebuts = payloads.length;
+        let packet_loss = 100*(1-rebuts/intents);
+        //console.log({tx_minim,tx_maxim,intents,rebuts,packet_loss});
+        return packet_loss;
+      },
     },
   });
 </script>

@@ -16,6 +16,6 @@ rm login.json
 
 #GET data uplinks
 #curl -s -X GET 'https://wmc-poc.wanesy.com/gms/application/dataUp' \
-curl -s -X GET 'https://wmc-poc.wanesy.com/gms/application/dataUp?fields=endDevice,recvTime,payload&pageSize=1000&page=1' \
+curl -s -X GET 'https://wmc-poc.wanesy.com/gms/application/dataUp?fields=endDevice,recvTime,payload,gwInfo&pageSize=1000&page=3' \
   -H "accept: application/json" \
   -H "Authorization: Bearer $bearer_token" #| json_pp
